@@ -4,14 +4,14 @@ on:
   workflow_dispatch:
     inputs:
       apk_name:
-        description: 'Nama file APK output'
+        description: 'Nama file APK'
         required: true
         default: 'GeneticV3'
       telegram_bot:
-        description: 'Telegram Bot Token (opsional)'
+        description: 'Telegram Bot Token'
         required: false
       telegram_chat:
-        description: 'Telegram Chat ID (opsional)'
+        description: 'Telegram Chat ID'
         required: false
 
 jobs:
@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
+    - name: Checkout
       uses: actions/checkout@v4
       
-    - name: Set up JDK 17
+    - name: Setup JDK 17
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
@@ -31,7 +31,16 @@ jobs:
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
       
-    - name: Inject config
+    - name: Generate Gradle Wrapper
+      run: |
+        mkdir -p gradle/wrapper
+        curl -L https://github.com/gradle/gradle/raw/v8.2.0/gradle/wrapper/gradle-wrapper.jar -o gradle/wrapper/gradle-wrapper.jar
+        curl -L https://github.com/gradle/gradle/raw/v8.2.0/gradle/wrapper/gradle-wrapper.properties -o gradle/wrapper/gradle-wrapper.properties
+        curl -L https://github.com/gradle/gradle/raw/v8.2.0/gradlew -o gradlew
+        curl -L https://github.com/gradle/gradle/raw/v8.2.0/gradlew.bat -o gradlew.bat
+        chmod +x gradlew
+        
+    - name: Inject Config
       run: |
         if [ -n "${{ github.event.inputs.telegram_bot }}" ]; then
           echo "telegramBot=${{ github.event.inputs.telegram_bot }}" >> gradle.properties
@@ -42,7 +51,6 @@ jobs:
         
     - name: Build APK
       run: |
-        chmod +x gradlew
         ./gradlew assembleRelease --no-daemon
         
     - name: Upload APK
