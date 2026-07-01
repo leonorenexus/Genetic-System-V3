@@ -1,0 +1,5 @@
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+-keep class com.genetic.system.v3.** { *; }
+-keepclassmembers class com.genetic.system.v3.** { *; }
